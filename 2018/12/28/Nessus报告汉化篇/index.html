@@ -5,18 +5,25 @@
   
 
   
-  <title>业精于勤荒于嬉</title>
+  <title>Nessus报告汉化篇一(数据准备阶段) | 业精于勤荒于嬉</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="漏洞修复及建议、网络安全、WEB渗透、内网渗透">
-<meta property="og:type" content="website">
-<meta property="og:title" content="业精于勤荒于嬉">
-<meta property="og:url" content="http://yoursite.com/index.html">
+  <meta name="description" content="前言　就笔者目前在工作中使用过的众多扫描器来看，即使是使用免费版Nessus，无论是从扫描的准确度还是漏洞更新的及时性来看，都完虐国内大多数付费版的扫描器。　虽然比较好用，但是Nessus并不提供中文的报告文档，这点就比较尴尬，所以我才有了做‘汉化’的这样一个想法。当然这个汉化肯定不是规规矩矩去进行翻译汉化。工作量那么大，当然得使用脚本去进行批量的操作呀！ 准备　在使用Nessus扫描完成之后，导">
+<meta name="keywords" content="Python">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Nessus报告汉化篇一(数据准备阶段)">
+<meta property="og:url" content="http://yoursite.com/2018/12/28/Nessus报告汉化篇/index.html">
 <meta property="og:site_name" content="业精于勤荒于嬉">
-<meta property="og:description" content="漏洞修复及建议、网络安全、WEB渗透、内网渗透">
+<meta property="og:description" content="前言　就笔者目前在工作中使用过的众多扫描器来看，即使是使用免费版Nessus，无论是从扫描的准确度还是漏洞更新的及时性来看，都完虐国内大多数付费版的扫描器。　虽然比较好用，但是Nessus并不提供中文的报告文档，这点就比较尴尬，所以我才有了做‘汉化’的这样一个想法。当然这个汉化肯定不是规规矩矩去进行翻译汉化。工作量那么大，当然得使用脚本去进行批量的操作呀！ 准备　在使用Nessus扫描完成之后，导">
 <meta property="og:locale" content="default">
+<meta property="og:image" content="http://yoursite.com/2018/12/28/Nessus报告汉化篇/Nessus报告汉化篇/1.jpg">
+<meta property="og:image" content="http://yoursite.com/2018/12/28/Nessus报告汉化篇/Nessus报告汉化篇/2.jpg">
+<meta property="og:image" content="http://yoursite.com/2018/12/28/Nessus报告汉化篇/Nessus报告汉化篇/3.jpg">
+<meta property="og:image" content="http://yoursite.com/2018/12/28/Nessus报告汉化篇/Nessus报告汉化篇/4.jpg">
+<meta property="og:updated_time" content="2018-12-28T09:38:48.499Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="业精于勤荒于嬉">
-<meta name="twitter:description" content="漏洞修复及建议、网络安全、WEB渗透、内网渗透">
+<meta name="twitter:title" content="Nessus报告汉化篇一(数据准备阶段)">
+<meta name="twitter:description" content="前言　就笔者目前在工作中使用过的众多扫描器来看，即使是使用免费版Nessus，无论是从扫描的准确度还是漏洞更新的及时性来看，都完虐国内大多数付费版的扫描器。　虽然比较好用，但是Nessus并不提供中文的报告文档，这点就比较尴尬，所以我才有了做‘汉化’的这样一个想法。当然这个汉化肯定不是规规矩矩去进行翻译汉化。工作量那么大，当然得使用脚本去进行批量的操作呀！ 准备　在使用Nessus扫描完成之后，导">
+<meta name="twitter:image" content="http://yoursite.com/2018/12/28/Nessus报告汉化篇/Nessus报告汉化篇/1.jpg">
   
     <link rel="alternate" href="/atom.xml" title="业精于勤荒于嬉" type="application/atom+xml">
   
@@ -63,9 +70,7 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main">
-  
-    <article id="post-Nessus报告汉化篇" class="article article-type-post" itemscope="" itemprop="blogPost">
+        <section id="main"><article id="post-Nessus报告汉化篇" class="article article-type-post" itemscope="" itemprop="blogPost">
   <div class="article-meta">
     <a href="/2018/12/28/Nessus报告汉化篇/" class="article-date">
   <time datetime="2018-12-28T08:04:41.000Z" itemprop="datePublished">2018-12-28</time>
@@ -78,8 +83,8 @@
       <header class="article-header">
         
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/12/28/Nessus报告汉化篇/">Nessus报告汉化篇一(数据准备阶段)</a>
+    <h1 class="article-title" itemprop="name">
+      Nessus报告汉化篇一(数据准备阶段)
     </h1>
   
 
@@ -102,137 +107,19 @@
     </footer>
   </div>
   
-</article>
-
-
+    
+<nav id="article-nav">
   
-    <article id="post-WEB安全" class="article article-type-post" itemscope="" itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2018/12/28/WEB安全/" class="article-date">
-  <time datetime="2018-12-28T07:31:10.000Z" itemprop="datePublished">2018-12-28</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/12/28/WEB安全/">WEB安全</a>
-    </h1>
+    <a href="/2018/12/28/WEB安全/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">WEB安全</div>
+    </a>
   
+</nav>
 
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/12/28/WEB安全/" data-id="cjq7ui7nr0002b4jix3utlvu6" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/安全/">安全</a></li></ul>
-
-    </footer>
-  </div>
   
 </article>
-
-
-  
-    <article id="post-个人简介" class="article article-type-post" itemscope="" itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2018/12/28/个人简介/" class="article-date">
-  <time datetime="2018-12-28T07:31:10.000Z" itemprop="datePublished">2018-12-28</time>
-</a>
-    
-  <div class="article-category">
-    <a class="article-category-link" href="/categories/杂记/">杂记</a>
-  </div>
-
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/12/28/个人简介/">自介</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>安全行业从事者<br>弱鸡白帽<br>编程菜鸟<br>懒癌晚期<br>专挖低危漏洞  </p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/12/28/个人简介/" data-id="cjq7ui7o30005b4jicdc07li0" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/杂记/">杂记</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-hello-world" class="article article-type-post" itemscope="" itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2018/11/02/hello-world/" class="article-date">
-  <time datetime="2018-11-02T09:33:00.183Z" itemprop="datePublished">2018-11-02</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/11/02/hello-world/">Hello World</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2018/11/02/hello-world/" data-id="cjq7ui7nz0004b4jiow9mavm9" class="article-share-link">Share</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-
 
 </section>
         
