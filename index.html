@@ -87,14 +87,14 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>　接着上篇，在上篇中已经收集到了我们所需要的漏洞库，那么接下来就是一个简单的文档处理。<font color="red">本文章是针对于xlsx格式漏洞库进行处理的，后期我会把基于Mysql进行对比的脚本进行更新。</font><br>　备注：可以将漏洞数据库直接导出为CVS,然后保存为xlsx便可。<br>　先做一个简单的分析，如图，我们需要重点关注的有<font color="red">CVE，Host，Risk </font><br><img src="/2019/01/02/Nessus报告汉化篇二/1.jpg" alt=""><br>　然后我们需要做个筛选，将Risk为None的筛除掉<br><img src="/2019/01/02/Nessus报告汉化篇二/2.jpg" alt=""><br>　最后还需要将无CVE编号的漏洞先筛除掉,如图<br><img src="/2019/01/02/Nessus报告汉化篇二/3.jpg" alt=""><br>　下图为数据库导出的xlsx漏洞库文档截图<br><img src="/2019/01/02/Nessus报告汉化篇二/5.jpg" alt=""><br>　其实到这里，大家应该也明白了，这个‘汉化’的意思吧，其实就是一个简单的对比，通过Nessus报告中的CVE编号与漏洞库进行对比，然后生成新的文档。<br>　那么可能有同学会说筛选掉的漏洞中，那些有危险的漏洞，又该怎么办呢，其实当我在写这个脚本的时候我也有想过，但是经过这么久的工作经历中来看，其实筛选掉那些没有编号的漏洞，要么是难以利用，要么就是危害及小。<br>　因为工作较多，我会在每次处理完脚本后，自己在快速浏览一遍那些没有编号，但同时Risk与CVSS较高的漏洞，如果其中含有影响比较严重的漏洞，我会进行手动添加。<br>　这里先放一张处理好后的文档截图。最终效果就是这样。<br><img src="/2019/01/02/Nessus报告汉化篇二/4.jpg" alt="">  </p>
+        <p>　接着上篇，在上篇中已经收集到了我们所需要的漏洞库，那么接下来就是一个简单的文档处理。<font color="red">本文章是针对于xlsx格式漏洞库进行处理的，后期我会把基于Mysql进行对比的脚本进行更新。</font><br>　备注：可以将漏洞数据库直接导出为CVS,然后保存为xlsx便可。<br>　先做一个简单的分析，如图，我们需要重点关注的有<font color="red">CVE，Host，Risk </font><br><img src="/2019/01/02/Nessus报告汉化篇二/1.jpg" alt=""><br>　然后我们需要做个筛选，将Risk为None的筛除掉<br><img src="/2019/01/02/Nessus报告汉化篇二/2.png" alt=""><br>　最后还需要将无CVE编号的漏洞先筛除掉,如图<br><img src="/2019/01/02/Nessus报告汉化篇二/3.jpg" alt=""><br>　下图为数据库导出的xlsx漏洞库文档截图<br><img src="/2019/01/02/Nessus报告汉化篇二/5.jpg" alt=""><br>　其实到这里，大家应该也明白了，这个‘汉化’的意思吧，其实就是一个简单的对比，通过Nessus报告中的CVE编号与漏洞库进行对比，然后生成新的文档。<br>　那么可能有同学会说筛选掉的漏洞中，那些有危险的漏洞，又该怎么办呢，其实当我在写这个脚本的时候我也有想过，但是经过这么久的工作经历中来看，其实筛选掉那些没有编号的漏洞，要么是难以利用，要么就是危害及小。<br>　因为工作较多，我会在每次处理完脚本后，自己在快速浏览一遍那些没有编号，但同时Risk与CVSS较高的漏洞，如果其中含有影响比较严重的漏洞，我会进行手动添加。<br>　这里先放一张处理好后的文档截图。最终效果就是这样。<br><img src="/2019/01/02/Nessus报告汉化篇二/4.jpg" alt="">  </p>
 <p>　下面是就是一个简单的初步处理脚本，但是这个脚本处理后并不能达到我上图所展示的效果，如IP所属部门、所属系统、是否为遗留漏洞都未在这个脚本中实现。其实笔者的想法是，大家可以根据这个思路自己调整代码，最终写出一个更适合自己使用的脚本。完整的处理脚本和漏洞库我也会在随后的几篇博文进行更新。<font color="red">备注：有可能Nessus扫描文档中会出现，不在漏洞库中的漏洞。针对那些漏洞编号，脚本会打印在控制台，这些漏洞就只能自己去搜索补充到漏洞库中了。</font><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">&apos;&apos;&apos;</span><br><span class="line">需要将Nessus导出的CVS文件进行筛选后，另存为xlsx文件，同时更改表名</span><br><span class="line">&apos;&apos;&apos;</span><br><span class="line">import datetime</span><br><span class="line">from openpyxl import load_workbook,Workbook</span><br><span class="line">#初始报告载入</span><br><span class="line">#workbook = load_workbook(&quot;去除信息和无CVE编号的漏洞后.xlsx&quot;)</span><br><span class="line">workbook = load_workbook(&quot;12月全量.xlsx&quot;)</span><br><span class="line">worksheet = workbook[&quot;vulns&quot;]</span><br><span class="line">#漏洞库载入</span><br><span class="line">workbook_vul = load_workbook(&quot;漏洞库.xlsx&quot;)</span><br><span class="line">worksheet_vul = workbook_vul[&quot;all&quot;]</span><br><span class="line"></span><br><span class="line">#新报告创建</span><br><span class="line">workbook_new = Workbook(&quot;12月全量_report.xlsx&quot;)</span><br><span class="line">workbook_new.create_sheet(&quot;vulns&quot;)</span><br><span class="line">worksheet_new = workbook_new[&quot;vulns&quot;]</span><br><span class="line">worksheet_new.append([&quot;IP&quot;,&quot;hostname&quot;,&quot;scan_time&quot;,&quot;port&quot;,&quot;protocol&quot;,&quot;service&quot;,&quot;vulerability&quot;,&quot;risk_level&quot;,&quot;CVE_number&quot;,&quot;detailed&quot;,&quot;solution&quot;,&quot;return_info&quot;,&quot;remark&quot;,&quot;bumen&quot;,&quot;xitong&quot;])</span><br><span class="line">vul_level_dic =&#123;&quot;Low&quot;:&apos;[低]&apos;,&quot;Medium&quot;:&quot;[中]&quot;,&quot;Critical&quot;:&quot;[高]&quot;,&quot;High&quot;:&quot;[高]&quot;&#125;</span><br><span class="line">for i in range(2, worksheet.max_row + 1):</span><br><span class="line">    for j in range(2,worksheet_vul.max_row + 1):</span><br><span class="line">        if worksheet.cell(row=i,column=2).value == worksheet_vul.cell(row=j,column=2).value:</span><br><span class="line">            ip = worksheet.cell(row=i,column=5).value</span><br><span class="line">            hostname = &quot;&quot;</span><br><span class="line">            scan_time = datetime.datetime.now().strftime(&apos;%Y-%m-%d&apos;)</span><br><span class="line">            port = worksheet.cell(row=i,column=7).value</span><br><span class="line">            protocol = worksheet.cell(row=i,column=6).value</span><br><span class="line">            service = &quot;&quot;</span><br><span class="line">            vul_name = worksheet_vul.cell(row=j,column=1).value #漏洞名称</span><br><span class="line">            vul_level = worksheet.cell(row=i,column=4).value.strip()</span><br><span class="line">            vul_level = vul_level_dic[vul_level]</span><br><span class="line">            vul_cve =  worksheet_vul.cell(row=j,column=2).value</span><br><span class="line">            vul_detail = worksheet_vul.cell(row=j,column=3).value</span><br><span class="line">            vul_suggest = worksheet_vul.cell(row=j,column=4).value</span><br><span class="line">            worksheet_new.append([ip,hostname,scan_time,port,protocol,service,vul_name,vul_level,vul_cve,vul_detail,vul_suggest ])</span><br><span class="line">            break</span><br><span class="line">        if j == worksheet_vul.max_row:</span><br><span class="line">            print(worksheet.cell(row=i, column=2).value)</span><br><span class="line">workbook_new.save(&quot;12月全量_report.xlsx&quot;)</span><br></pre></td></tr></table></figure></p>
 <p>　题外话：其实笔者没有去系统的学习过Python，只是以前有过一些别的语言的开发经历，然后自己写脚本的过程中也是边写边学，所以说Python是真的惊艳到我了，并不需要花费大量时间去学习，只要了解基础语法，了解库的作用，就能快速将自己的想法用代码进行实现。吹爆！<br>　最后，笔者最近找到一个Google翻译，经过了简单的测试发现还挺好用，等这儿工作忙完了，我会写一个类似于上面处理效果的脚本。不过是利用Google进行汉化，这样就不用再去筛选漏洞了。然后还有一个小目标，就是之后我会写一个脚本，利用Nessus的CVS文档，生成汉化后的PDF或者word漏洞报告文档！</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://holdontoyourheart.github.io/2019/01/02/Nessus报告汉化篇二/" data-id="cjqekxipj0001a8jiug3am9q0" class="article-share-link">Share</a>
+      <a data-url="https://holdontoyourheart.github.io/2019/01/02/Nessus报告汉化篇二/" data-id="cjqvzlukg00020sjir0syalsa" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Python/">Python</a></li></ul>
@@ -135,7 +135,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://holdontoyourheart.github.io/2018/12/28/Nessus报告汉化篇/" data-id="cjq7ufor3000tc8jiew4804mz" class="article-share-link">Share</a>
+      <a data-url="https://holdontoyourheart.github.io/2018/12/28/Nessus报告汉化篇/" data-id="cjqvzluk100000sji0upjs8f7" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Python/">Python</a></li></ul>
@@ -173,7 +173,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://holdontoyourheart.github.io/2018/12/28/WEB安全/" data-id="cjq7pxefn0008c8ji33qdizxj" class="article-share-link">Share</a>
+      <a data-url="https://holdontoyourheart.github.io/2018/12/28/WEB安全/" data-id="cjqvzluko00040sji3q7iwvx3" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/安全/">安全</a></li></ul>
@@ -216,7 +216,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://holdontoyourheart.github.io/2018/12/28/个人简介/" data-id="cjq7q4vau000dc8jil4vt5ps8" class="article-share-link">Share</a>
+      <a data-url="https://holdontoyourheart.github.io/2018/12/28/个人简介/" data-id="cjqvzlukq00050sji4fl2ho61" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/杂记/">杂记</a></li></ul>
@@ -263,7 +263,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://holdontoyourheart.github.io/2018/11/02/hello-world/" data-id="cjq7p6u6w0000c8jixf71juga" class="article-share-link">Share</a>
+      <a data-url="https://holdontoyourheart.github.io/2018/11/02/hello-world/" data-id="cjqvzluku00060sjiavff403t" class="article-share-link">Share</a>
       
       
     </footer>
